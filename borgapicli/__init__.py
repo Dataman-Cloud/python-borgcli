@@ -2,7 +2,6 @@ import argparse, getpass, json
 
 from borgapicli.plugins.app import AppPlugin
 from borgapicli.plugins.auth import AuthPlugin
-from borgapicli.plugins.log import LogPlugin
 from borgapicli.plugins.user import UserPlugin
 
 
@@ -26,11 +25,6 @@ class ClientRunner(object):
         app_plugin = AppPlugin(self)
         app_plugin._before_register(subparsers)
         app_plugin.register()
-
-        # load log api command line
-        log_plugin = LogPlugin(self)
-        log_plugin._before_register(subparsers)
-        log_plugin.register()
 
         # load user api command line
         user_login = UserPlugin(self)

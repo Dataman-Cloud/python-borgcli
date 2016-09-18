@@ -14,204 +14,115 @@
 #    under the License.
 
 import copy
+import os, json
+
 from jsonschema import SchemaError, ValidationError, validate
 from borgclient.utils import url_maker
 
+APP_SCHEMA_FILE = './borgclient/app_schema.json'
 
 class AppMixin(object):
     """App associated APIs"""
 
-    def get_cluster_apps(self, cluster_id, **kwargs):
+    def get_apps(self, **kwargs):
         """List all apps for speicified cluster"""
 
-        resp = self.http.get(url_maker("/clusters", cluster_id, "apps"),
-                             **kwargs)
+        resp = self.http.get("/apps")
 
         return self.process_data(resp)
 
-    def create_cluster_apps(self, cluster_id, **kwargs):
-        """Create app under speicified cluster
+    def create_app(self, **kwargs):
+        """Create app
 
-        :param cluster_id: Cluster identifier
         :param data: Dictionary to send in the body of the request.
 
         """
 
         # NOTE(mgniu): `deep copy or shallow copy? i'm confused.
         data = copy.deepcopy(kwargs)
-
-        schema = {
-            "type": "object",
-            "properties": {
-                "name": {"type": "string"},
-                "instances": {"type": "number"},
-                "volumes": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "hostPath": {"type": "string"},
-                            "containerPath": {"type": "string"},
-                         },
-                     },
-                 },
-                "portMappings": {
-                     "type": "array",
-                     "items": {
-                         "type": "object",
-                         "properties": {
-                             "appPort": {"type": "number"},
-                             "protocol": {"type": "number"},
-                             "isUri": {"type": "number"},
-                             "type": {"type": "number"},
-                             "mapPort": {"type": "number"},
-                             "uri": {"type": "string"},
-                          },
-                      },
-                   },
-                "cpus": {"type": "number"},
-                "mem": {"type": "number"},
-                "cmd": {"type": "string"},
-                "envs": {
-                       "type": "array",
-                       "items": {
-                           "type": "object",
-                           "properties": {
-                               "key": {"type": "string"},
-                               "value": {"type": "string"},
-                            },
-                        },
-                   },
-                "imageName": {"type": "string"},
-                "imageVersion": {"type": "string"},
-                "forceImage": {"type": "boolean"},
-                "network": {"type": "string"},
-                "constraints": {
-                       "type": "array",
-                       "items": {
-                           "type": "array",
-                           "items": {"type": "string"},
-                       },
-                   },
-                "parameters": {
-                       "type": "array",
-                       "items": {
-                           "type": "object",
-                           "properties": {
-                               "key": {"type": "string"},
-                               "value": {"type": "string"},
-                           },
-                       },
-                   }
-            }
-        }
+        if os.path.exists(APP_SCHEMA_FILE):
+            with open(APP_SCHEMA_FILE, 'r') as f:
+                schema = json.loads(f.read())
+        else:
+            schema = {}
         try:
             validate(data, schema)
         except (SchemaError, ValidationError) as e:
             return e
 
-        resp = self.http.post(url_maker("/clusters", cluster_id, "apps"),
-                              data=data)
+        resp = self.http.post("/apps", data=data)
 
         return self.process_data(resp)
 
-    def get_cluster_app(self, cluster_id, app_id):
+    def get_app(self, app_id):
         """List specified app information under specified cluster"""
 
-        resp = self.http.get(url_maker("/clusters", cluster_id,
-                                       "apps", app_id))
+        resp = self.http.get(url_maker("/apps", app_id))
 
         return self.process_data(resp)
 
-    def delete_cluster_app(self, cluster_id, app_id):
-        """Delete specified app under specified cluster"""
+    def get_app_stats(self, app_id):
+        """List a specific app's stats"""
 
-        resp = self.http.delete(url_maker("/clusters", cluster_id,
-                                          "apps", app_id))
-        return self.process_data(resp)
-
-    def get_user_apps(self, **kwargs):
-        """List all apps belong to specified user."""
-
-        resp = self.http.get("/apps", **kwargs)
+        resp = self.http.get(url_maker("/apps", app_id, "stats" ))
 
         return self.process_data(resp)
 
-    def get_user_apps_status(self):
-        """List all app's status"""
-
-        resp = self.http.get("/apps/status")
-
-        return self.process_data(resp)
-
-    def get_app_versions(self, cluster_id, app_id):
-        """List all history versions for app"""
-
-        resp = self.http.get(url_maker("/clusters", cluster_id, "apps", app_id,
-                                       "versions"))
-
-        return self.process_data(resp)
-
-    def delete_app_version(self, cluster_id, app_id, version_id):
-        """Delete app version"""
-
-        resp = self.http.delete(url_maker("/clusters", cluster_id,
-                                          "apps", app_id, "versions",
-                                          version_id))
-        return self.process_data(resp)
-
-    def update_cluster_app(self, cluster_id, app_id, http_method, **kwargs):
+    def update_app(self, app_id, **kwargs):
         """Updated app configuration"""
 
-        if not http_method or http_method.lower() == 'patch':
-            resp = self.http.patch(url_maker("/clusters", cluster_id,
-                                             "apps", app_id),
-                                   data=kwargs)
+        data = copy.deepcopy(kwargs)
+        if os.path.exists(APP_SCHEMA_FILE):
+            with open(APP_SCHEMA_FILE, 'r') as f:
+                schema = json.loads(f.read())
         else:
-            resp = self.http.put(url_maker("/clusters", cluster_id, "apps",
-                                           app_id), data=kwargs)
+            schema = {}
+        try:
+            validate(data, schema)
+        except (SchemaError, ValidationError) as e:
+            return e
+
+        resp = self.http.put(url_maker("/apps", app_id), data=data)
 
         return self.process_data(resp)
 
-    def get_app_tasks(self, cluster_id, app_id):
-        """List all app tasks"""
+    def delete_app(self, app_id):
+        """Delete specified app"""
 
-        resp = self.http.get(url_maker("/clusters", cluster_id, "apps", app_id,
-                                       "tasks"))
+        resp = self.http.delete(url_maker("/apps", app_id))
+        return self.process_data(resp)
+
+    def restart_app(self, app_id):
+        """Delete specified app"""
+
+        resp = self.http.post(url_maker("/apps", app_id, "restart"))
+        return self.process_data(resp)
+
+    def get_app_tasks(self, app_id):
+        """List a specific app's tasks"""
+
+        resp = self.http.get(url_maker("/apps", app_id, "tasks"))
 
         return self.process_data(resp)
 
-    def get_app_events(self, cluster_id, app_id):
-        """List all app events"""
+    def get_app_versions(self, app_id):
+        """List all history versions for app"""
 
-        resp = self.http.get(url_maker("/clusters", cluster_id, "apps", app_id,
-                                       "events"))
-
-        return self.process_data(resp)
-
-    def get_app_nodes(self, cluster_id, app_id):
-        """List all app instances."""
-
-        resp = self.http.get(url_maker("/clusters", cluster_id, "apps", app_id,
-                                       "appnodes"))
+        resp = self.http.get(url_maker("/apps", app_id, "versions"))
 
         return self.process_data(resp)
 
-    def get_cluster_ports(self, cluster_id):
-        """list the inner ports and outer ports for a specific cluster"""
+    def get_app_version(self, app_id, version_id):
+        """List all history versions for app"""
 
-        resp = self.http.get(url_maker("/clusters", cluster_id, "ports"))
+        resp = self.http.get(url_maker("/apps", app_id, "versions", version_id))
+
         return self.process_data(resp)
 
-    def get_app_scale_log(self, cluster_id, app_id, strategy_id):
-        """get the auto scale history when provided a strategy id"""
-
-        resp = self.http.get(url_maker("/clusters", cluster_id, "apps", app_id,
-                                       "scale", strategy_id))
+    def delete_tasks(self, if_scale, **kwargs):
+        resp = self.http.post("/tasks/delete?scale=" + str(if_scale).lower(), data=kwargs)
         return self.process_data(resp)
 
-    def get_user_scale_log(self):
-        """get all the auto scale history owned by this loggin user """
-
-        resp = self.http.get(url_maker("/scales"))
+    def get_queue(self):
+        resp = self.http.get("/queue")
         return self.process_data(resp)

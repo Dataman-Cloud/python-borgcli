@@ -1,7 +1,7 @@
 import json
 import os, sys
 
-CONFIG_FILE = '.sryapi-cli.json'
+CONFIG_FILE = '.borgapi-cli.json'
 
 
 class BORGClientPlugin(object):

@@ -1,250 +1,194 @@
-import argparse, json
+import argparse, json, os
+from os import listdir
+from os.path import isfile, join
+
 import borgclient
 from borgapicli.plugin_helpers import BORGClientPlugin
-ACTIONS = ['stop', 'start']
+
+class ReadableDir(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        prospective_dir = values
+        if not os.path.isdir(prospective_dir):
+            raise argparse.ArgumentTypeError("ReadableDir:{0} is not a valid path".format(prospective_dir))
+        if os.access(prospective_dir, os.R_OK):
+            setattr(namespace,self.dest,prospective_dir)
+        else:
+            raise argparse.ArgumentTypeError("ReadableDir:{0} is not a readable dir".format(prospective_dir))
 
 
 class AppPlugin(BORGClientPlugin):
 
     def register(self):
-        self.set_command('app', help='omega-app api command list')
+        self.set_command('app', help='borgsphere app api command list')
 
-        # sub-commands: ['rollback', 'stop', 'start', 'stop_deploy', 'stop_scaling', 'redeploy']
-        # now only implement stop, start sub-commands.
-        for action in ACTIONS:
-            action_parser = self.add_action(action, help=action + 'a specified app')
-            action_parser.add_argument('--cluster_id', dest='cluster_id', type=int, required=True)
-            action_parser.add_argument('--app_id', dest='app_id', type=int, required=True)
-            action_parser.add_argument('--action', dest='action', default=action, help=argparse.SUPPRESS)
-            action_parser.set_defaults(func=self._action_cluster_app)
+        # sub-command: get_apps
+        get_apps_parser = self.add_action('all', help='list all apps' )
+        get_apps_parser.set_defaults(func=self._get_apps)
 
-        # sub-command: scale
-        scale_parser = self.add_action('scale', help='scale instances for a specified app')
-        scale_parser.add_argument('--cluster_id', dest='cluster_id', type=int, required=True)
-        scale_parser.add_argument('--app_id', dest='app_id', type=int, required=True)
-        scale_parser.add_argument('--instances', dest='instances', type=int, required=True)
-        scale_parser.set_defaults(func=self._scale_app)
+        # sub-command: create_app
+        create_apps_parser = self.add_action('create', help='create app from specified file')
+        create_apps_parser.add_argument('-f', '--file', help='bundle json containing new app info', type=argparse.FileType('r'), required=True)
+        create_apps_parser.set_defaults(func=self._create_app)
 
-        # sub-command: update_version
-        update_version_parser = self.add_action('update_version', help='update app version')
-        update_version_parser.add_argument('--cluster_id', dest='cluster_id', type=int, required=True)
-        update_version_parser.add_argument('--app_id', dest='app_id', type=int, required=True)
-        update_version_parser.add_argument('--version_id', dest='version_id', type=int, required=True)
-        update_version_parser.set_defaults(func=self._update_app_version)
+        # sub-command: create_multi_apps
+        create_multi_apps_parser = self.add_action('create_multi_apps', help='create multiple apps from a directory containing app json files')
+        create_multi_apps_parser.add_argument('-d', '--dir', help='directory containing app json files', action=ReadableDir, required=True)
+        create_multi_apps_parser.set_defaults(func=self._create_multi_apps)
 
-        # sub-command: get_cluster_apps
-        get_apps_parser = self.add_action('get_cluster_apps', help='list all apps for specified cluster' )
-        get_apps_parser.add_argument('--cluster_id',dest='cluster_id', type=int, required=True)
-        get_apps_parser.set_defaults(func=self._get_cluster_apps)
+        # sub-command: get_app
+        get_app_parser = self.add_action('get', help='list specified app information when given the app id')
+        get_app_parser.add_argument('--app_id', dest="app_id", type=str, required=True)
+        get_app_parser.set_defaults(func=self._get_app)
 
-        # sub-command: create_cluster_apps
-        create_cluster_apps_parser = self.add_action('create', help='create app under specified cluster')
-        create_cluster_apps_parser.add_argument('--cluster_id', dest='cluster_id', type=int, help='Cluster identifier')
-        create_cluster_apps_parser.add_argument('-f', '--file', help='bundle json containing new app info', type=argparse.FileType('r'), required=True)
-        create_cluster_apps_parser.set_defaults(func=self._create_cluster_apps)
+        # sub-command: get_app_stats
+        #get_app_stats_parser = self.add_action('get_app_stats', help="list a specific app's status")
+        #get_app_stats_parser.add_argument('--app_id', dest="app_id", type=str, required=True)
+        #get_app_stats_parser.set_defaults(func=self._get_app_stats)
 
-        # sub-command: get_cluster_app
-        get_cluster_app_parser = self.add_action('get', help='list specified app information under specified cluster')
-        get_cluster_app_parser.add_argument('--cluster_id', dest='cluster_id', type=int, required=True)
-        get_cluster_app_parser.add_argument('--app_id', dest="app_id", type=int, required=True)
-        get_cluster_app_parser.set_defaults(func=self._get_cluster_app)
+        # sub-command: update_app
+        update_app_parser = self.add_action('update', help='update app configuration')
+        update_app_parser.add_argument('--app_id', dest='app_id', type=str, required=True)
+        update_app_parser.add_argument('-f', '--file', help='bundle json containing new app info', type=argparse.FileType('r'), required=True)
+        update_app_parser.set_defaults(func=self._update_app)
 
-        # sub-command: delete_cluster_app
-        delete_cluster_app_parser = self.add_action('delete', help='Delete specified app under specified cluster')
-        delete_cluster_app_parser.add_argument('--cluster_id', dest='cluster_id', type=int, required=True)
-        delete_cluster_app_parser.add_argument('--app_id', dest="app_id", type=int, required=True)
-        delete_cluster_app_parser.set_defaults(func=self._delete_cluster_app)
+        # sub-command: delete_app
+        delete_app_parser = self.add_action('delete', help='delete specified app')
+        delete_app_parser.add_argument('--app_id', dest="app_id", type=str, required=True)
+        delete_app_parser.set_defaults(func=self._delete_app)
 
-        # sub-command: get_user_apps
-        get_user_apps_parser = self.add_action('get_my_apps', help='list all apps belong to me.')
-        get_user_apps_parser.set_defaults(func=self._get_user_apps)
-
-        # sub-command: get_user_apps_status
-        get_user_apps_status_parser = self.add_action('get_my_app_status', help="list all app's status")
-        get_user_apps_status_parser.set_defaults(func=self._get_user_apps_status)
+        # sub-command: restart_app
+        restart_app_parser = self.add_action('restart', help='restart specified app')
+        restart_app_parser.add_argument('--app_id', dest="app_id", type=str, required=True)
+        restart_app_parser.set_defaults(func=self._restart_app)
 
         # sub-command: get_app_versions
-        get_app_versions_parser = self.add_action('get_app_version', help='list all history versions for a specific app')
-        get_app_versions_parser.add_argument('--cluster_id', dest='cluster_id', type=int, required=True)
-        get_app_versions_parser.add_argument('--app_id', dest="app_id", type=int, required=True)
+        get_app_versions_parser = self.add_action('get_app_versions', help='list all history versions for a specific app')
+        get_app_versions_parser.add_argument('--app_id', dest="app_id", type=str, required=True)
         get_app_versions_parser.set_defaults(func=self._get_app_versions)
 
-        # sub-command: delete_app_version
-        delete_app_version_parser = self.add_action('delete_app_version', help='delete app version')
-        delete_app_version_parser.add_argument('--cluster_id', dest='cluster_id', type=int, required=True)
-        delete_app_version_parser.add_argument('--app_id', dest='app_id', type=int, required=True)
-        delete_app_version_parser.add_argument('--version_id', dest='version_id', type=str, required=True)
-        delete_app_version_parser.set_defaults(func=self._delete_app_version)
+        # sub-command: get_app_version
+        get_app_version_parser = self.add_action('get_app_version', help='get specific history version for a specific app')
+        get_app_version_parser.add_argument('--app_id', dest="app_id", type=str, required=True)
+        get_app_version_parser.add_argument('--version_id', dest="version_id", type=str, required=True)
+        get_app_version_parser.set_defaults(func=self._get_app_version)
 
-        # sub-command: update_cluster_app
-        update_cluster_app_parser = self.add_action('update_cluster_app', help='update app configuration')
-        update_cluster_app_parser.add_argument('--cluster_id', dest='cluster_id', type=int, required=True)
-        update_cluster_app_parser.add_argument('--app_id', dest='app_id', type=int, required=True)
-        update_cluster_app_parser.add_argument('--method', dest='http_method', choices=['patch', 'put'])
-        update_cluster_app_parser.add_argument('-f', '--file', help='bundle json containing new app info', type=argparse.FileType('r'), required=True)
-        update_cluster_app_parser.set_defaults(func=self._update_cluster_app)
+        # sub-command: delete_tasks
+        #scale_parser = self.add_action('delete_tasks', help='scale tasks for apps')
+        #scale_parser.add_argument('--scale', dest="if_scale", type=bool, required=False)
+        #scale_parser.add_argument('--app_ids', dest="app_ids", nargs='+', required=True)
+        #scale_parser.set_defaults(func=self._delete_tasks)
 
-        # sub-command: get_app_instances
-        get_app_tasks_parser = self.add_action('get_app_instances', help='list all instances for a specific app')
-        get_app_tasks_parser.add_argument('--cluster_id', dest='cluster_id', type=int, required=True)
+        # sub-command: get_queue
+        get_queue_parser = self.add_action('get_queue', help='list all queues')
+        get_queue_parser.set_defaults(func=self._get_queue)
+
+        # sub-command: get_app_tasks
+        get_app_tasks_parser = self.add_action('get_app_tasks', help='list all tasks for a specific app')
         get_app_tasks_parser.add_argument('--app_id', dest='app_id', type=str, required=True)
         get_app_tasks_parser.set_defaults(func=self._get_app_tasks)
 
-        # sub-command: get_app_events
-        get_app_events_parser = self.add_action('get_app_events', help='list all events for a specific app')
-        get_app_events_parser.add_argument('--cluster_id', dest='cluster_id', type=int, required=True)
-        get_app_events_parser.add_argument('--app_id', dest='app_id', type=str, required=True)
-        get_app_events_parser.set_defaults(func=self._get_app_events)
-
-        # sub-command: get_app_nodes
-        get_app_nodes_parser = self.add_action('get_app_nodes', help='list all nodes for a specific app')
-        get_app_nodes_parser.add_argument('--cluster_id', dest='cluster_id', type=int, required=True)
-        get_app_nodes_parser.add_argument('--app_id', dest='app_id', type=str, required=True)
-        get_app_nodes_parser.set_defaults(func=self._get_app_nodes)
-
-        # sub-command: get_cluster_ports
-        get_cluster_ports_parser = self.add_action('get_cluster_ports', help='list the inner ports and outer ports for a specific cluster')
-        get_cluster_ports_parser.add_argument('--cluster_id', dest='cluster_id', type=int, required=True)
-        get_cluster_ports_parser.set_defaults(func=self._get_cluster_ports)
-
-        # sub-command: get_app_scale_log
-        get_app_scale_log_parser = self.add_action('get_app_scale_log', help='get the auto scale history when provided a strategy id')
-        get_app_scale_log_parser.add_argument('--cluster_id', dest='cluster_id', type=int, required=True)
-        get_app_scale_log_parser.add_argument('--app_id', dest='app_id', type=int, required=True)
-        get_app_scale_log_parser.add_argument('--strategy_id', dest='strategy_id', type=int, required=True)
-        get_app_scale_log_parser.set_defaults(func=self._get_app_scale_log)
-
-        # sub-command: get_my_scale_log
-        get_user_scale_log_parser = self.add_action('get_my_scale_log', help='get all the auto scale history owned by this loggin user')
-        get_user_scale_log_parser.set_defaults(func=self._get_user_scale_log)
-
-    def _get_cluster_apps(self, args):
+    def _get_apps(self, args):
         configs = self._get_config()
-        cluster_id = args.cluster_id
         borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.get_cluster_apps(cluster_id)
+        return borg_client.get_apps()
 
-    def _create_cluster_apps(self, args):
+    def _create_app(self, args):
         configs = self._get_config()
-        cluster_id = args.cluster_id
-        data = json.loads(args.file.read())
+        try:
+            data = json.loads(args.file.read())
+        except ValueError as e:
+            raise e
+
         borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.create_cluster_apps(cluster_id, **data)
+        return borg_client.create_app(**data)
 
-    def _get_cluster_app(self, args):
+    def _create_multi_apps(self, args):
         configs = self._get_config()
-        cluster_id = args.cluster_id
+        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        app_dir = args.dir
+        files = [f for f in listdir(app_dir) if isfile(join(app_dir, f))]
+        created_apps = []
+        for file in files:
+            app_file = join(app_dir, file)
+            try:
+                with open(app_file, 'r') as f:
+                    data = json.loads(f.read())
+                    result = borg_client.create_app(**data)
+                    created_apps.append({
+                        "source_file": file,
+                        "result": result
+                    })
+            except ValueError as e:
+                return "Fail to load file " + file + ", please ensure the data is in json format:\n" + str(e)
+        return created_apps
+
+    def _get_app(self, args):
+        configs = self._get_config()
         app_id = args.app_id
         borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.get_cluster_app(cluster_id, app_id)
+        return borg_client.get_app(app_id)
 
-    def _delete_cluster_app(self, args):
+    def _delete_app(self, args):
         configs = self._get_config()
-        cluster_id = args.cluster_id
         app_id = args.app_id
         borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.delete_cluster_app(cluster_id, app_id)
+        return borg_client.delete_app(app_id)
 
-    def _get_user_apps(self, args):
+    def _restart_app(self, args):
         configs = self._get_config()
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.get_user_apps()
-
-    def _get_user_apps_status(self, args):
-        configs = self._get_config()
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.get_user_apps_status()
-
-    def _get_app_versions(self, args):
-        configs = self._get_config()
-        cluster_id = args.cluster_id
         app_id = args.app_id
         borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.get_app_versions(cluster_id, app_id)
+        return borg_client.restart_app(app_id)
 
-    def _delete_app_version(self, args):
+    def _get_app_stats(self, args):
         configs = self._get_config()
-        cluster_id = args.cluster_id
         app_id = args.app_id
-        version_id = args.version_id
         borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.delete_app_version(cluster_id, app_id, version_id)
+        return borg_client.get_app_stats(app_id)
 
-    def _update_cluster_app(self, args):
+    def _update_app(self, args):
         configs = self._get_config()
-        cluster_id = args.cluster_id
         app_id = args.app_id
-        http_method = args.http_method
-        data = json.loads(args.file.read())
+        try:
+            data = json.loads(args.file.read())
+        except ValueError as e:
+            raise e
+
         borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.update_cluster_app(cluster_id, app_id, http_method, **data)
+        return borg_client.update_app(app_id, **data)
 
     def _get_app_tasks(self, args):
         configs = self._get_config()
-        cluster_id = args.cluster_id
         app_id = args.app_id
         borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.get_app_tasks(cluster_id, app_id)
+        return borg_client.get_app_tasks(app_id)
 
-    def _get_app_events(self, args):
+    def _get_app_versions(self, args):
         configs = self._get_config()
-        cluster_id = args.cluster_id
         app_id = args.app_id
         borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.get_app_events(cluster_id, app_id)
+        return borg_client.get_app_versions(app_id)
 
-    def _get_app_nodes(self, args):
+    def _get_app_version(self, args):
         configs = self._get_config()
-        cluster_id = args.cluster_id
-        app_id = args.app_id
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.get_app_nodes(cluster_id, app_id)
-
-    def _get_cluster_ports(self, args):
-        configs = self._get_config()
-        cluster_id = args.cluster_id
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.get_cluster_ports(cluster_id)
-
-    def _get_app_scale_log(self, args):
-        configs = self._get_config()
-        cluster_id = args.cluster_id
-        app_id = args.app_id
-        strategy_id = args.strategy_id
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.get_app_scale_log(cluster_id, app_id, strategy_id)
-
-    def _get_user_scale_log(self, args):
-        configs = self._get_config()
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.get_user_scale_log()
-
-    def _action_cluster_app(self, args):
-        configs = self._get_config()
-        cluster_id = args.cluster_id
-        app_id = args.app_id
-        action = args.action
-        data = {'method': action}
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.update_cluster_app(cluster_id, app_id, 'patch', **data)
-
-    def _scale_app(self, args):
-        configs = self._get_config()
-        cluster_id = args.cluster_id
-        app_id = args.app_id
-        instances = args.instances
-        data = {'method': 'scale'}
-        data.update({'instances': instances})
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.update_cluster_app(cluster_id, app_id, 'patch', **data)
-
-    def _update_app_version(self, args):
-        configs = self._get_config()
-        cluster_id = args.cluster_id
         app_id = args.app_id
         version_id = args.version_id
-        data = {'method': 'update_version'}
-        data.update({'versionId': version_id})
         borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.update_cluster_app(cluster_id, app_id, 'patch', **data)
+        return borg_client.get_app_version(app_id, version_id)
 
+    def _delete_tasks(self, args):
+        configs = self._get_config()
+        if_scale = False
+        if args.if_scale:
+            if_scale = args.if_scale
+        app_ids = args.app_ids
+        #TODO(zliu): data is not valid json
+        data = {"ids": app_ids}
+        print("data:", data)
+        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        return borg_client.delete_tasks(if_scale, **data)
+
+    def _get_queue(self, args):
+        configs = self._get_config()
+        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        return borg_client.get_queue()

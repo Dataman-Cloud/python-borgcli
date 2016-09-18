@@ -52,7 +52,7 @@ class AuthPlugin(BORGClientPlugin):
         token_json = borg_client.get_token(email, password)
         if (token_json['code'] == 0):
             configs = {'host': host}
-            configs.update(token_json['data']) 
+            configs.update({'token': token_json['data']}) 
             self._save_config(configs)
         return token_json
 

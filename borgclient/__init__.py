@@ -51,7 +51,7 @@ class BorgClient(AppMixin, LogMixin, MetricsMixin, UserMixin, AuthMixin):
 
         self.http = HTTPClient(server_url, email, password, token=token)
 
-        super(OmegaClient, self).__init__()
+        super(BorgClient, self).__init__()
 
     @staticmethod
     def process_data(resp):
