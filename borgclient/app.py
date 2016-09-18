@@ -21,15 +21,14 @@ from borgclient.utils import url_maker
 class AppMixin(object):
     """App associated APIs"""
 
-    def get_cluster_apps(self, cluster_id, **kwargs):
+    def get_apps(self, **kwargs):
         """List all apps for speicified cluster"""
 
-        resp = self.http.get(url_maker("/clusters", cluster_id, "apps"),
-                             **kwargs)
+        resp = self.http.get("/apps")
 
         return self.process_data(resp)
 
-    def create_cluster_apps(self, cluster_id, **kwargs):
+    def create_cluster_apps(self, **kwargs):
         """Create app under speicified cluster
 
         :param cluster_id: Cluster identifier
@@ -110,108 +109,68 @@ class AppMixin(object):
         except (SchemaError, ValidationError) as e:
             return e
 
-        resp = self.http.post(url_maker("/clusters", cluster_id, "apps"),
-                              data=data)
+        resp = self.http.post("/apps", data=data)
 
         return self.process_data(resp)
 
-    def get_cluster_app(self, cluster_id, app_id):
+    def get_app(self, app_id):
         """List specified app information under specified cluster"""
 
-        resp = self.http.get(url_maker("/clusters", cluster_id,
-                                       "apps", app_id))
+        resp = self.http.get(url_maker("/apps", app_id))
 
         return self.process_data(resp)
 
-    def delete_cluster_app(self, cluster_id, app_id):
-        """Delete specified app under specified cluster"""
+    def get_app_stats(self, app_id):
+        """List a specific app's stats"""
 
-        resp = self.http.delete(url_maker("/clusters", cluster_id,
-                                          "apps", app_id))
-        return self.process_data(resp)
-
-    def get_user_apps(self, **kwargs):
-        """List all apps belong to specified user."""
-
-        resp = self.http.get("/apps", **kwargs)
+        resp = self.http.get(url_maker("/apps", app_id, "stats" ))
 
         return self.process_data(resp)
 
-    def get_user_apps_status(self):
-        """List all app's status"""
-
-        resp = self.http.get("/apps/status")
-
-        return self.process_data(resp)
-
-    def get_app_versions(self, cluster_id, app_id):
-        """List all history versions for app"""
-
-        resp = self.http.get(url_maker("/clusters", cluster_id, "apps", app_id,
-                                       "versions"))
-
-        return self.process_data(resp)
-
-    def delete_app_version(self, cluster_id, app_id, version_id):
-        """Delete app version"""
-
-        resp = self.http.delete(url_maker("/clusters", cluster_id,
-                                          "apps", app_id, "versions",
-                                          version_id))
-        return self.process_data(resp)
-
-    def update_cluster_app(self, cluster_id, app_id, http_method, **kwargs):
+    def update_app(self, app_id, **kwargs):
         """Updated app configuration"""
 
-        if not http_method or http_method.lower() == 'patch':
-            resp = self.http.patch(url_maker("/clusters", cluster_id,
-                                             "apps", app_id),
-                                   data=kwargs)
-        else:
-            resp = self.http.put(url_maker("/clusters", cluster_id, "apps",
-                                           app_id), data=kwargs)
+        resp = self.http.put(url_maker("/apps", app_id), data=kwargs)
 
         return self.process_data(resp)
 
-    def get_app_tasks(self, cluster_id, app_id):
-        """List all app tasks"""
+    def delete_app(self, app_id):
+        """Delete specified app"""
 
-        resp = self.http.get(url_maker("/clusters", cluster_id, "apps", app_id,
-                                       "tasks"))
+        resp = self.http.delete(url_maker("/apps", app_id))
+        return self.process_data(resp)
+
+    def restart_app(self, app_id):
+        """Delete specified app"""
+
+        resp = self.http.post(url_maker("/apps", app_id, "restart"))
+        return self.process_data(resp)
+
+    def get_app_tasks(self, app_id):
+        """List a specific app's tasks"""
+
+        resp = self.http.get(url_maker("/apps", app_id, "tasks"))
 
         return self.process_data(resp)
 
-    def get_app_events(self, cluster_id, app_id):
-        """List all app events"""
+    def get_app_versions(self, app_id):
+        """List all history versions for app"""
 
-        resp = self.http.get(url_maker("/clusters", cluster_id, "apps", app_id,
-                                       "events"))
-
-        return self.process_data(resp)
-
-    def get_app_nodes(self, cluster_id, app_id):
-        """List all app instances."""
-
-        resp = self.http.get(url_maker("/clusters", cluster_id, "apps", app_id,
-                                       "appnodes"))
+        resp = self.http.get(url_maker("/apps", app_id, "versions"))
 
         return self.process_data(resp)
 
-    def get_cluster_ports(self, cluster_id):
-        """list the inner ports and outer ports for a specific cluster"""
+    def get_app_version(self, app_id, version_id):
+        """List all history versions for app"""
 
-        resp = self.http.get(url_maker("/clusters", cluster_id, "ports"))
+        resp = self.http.get(url_maker("/apps", app_id, "versions", version_id))
+
         return self.process_data(resp)
 
-    def get_app_scale_log(self, cluster_id, app_id, strategy_id):
-        """get the auto scale history when provided a strategy id"""
+    #def scale_app(self, if_scale):
+    #    resp = self.http.post("/tasks/delete?scale=" + if_scale, data=*kwargs)
+    #    return self.process_data(resp)
 
-        resp = self.http.get(url_maker("/clusters", cluster_id, "apps", app_id,
-                                       "scale", strategy_id))
-        return self.process_data(resp)
-
-    def get_user_scale_log(self):
-        """get all the auto scale history owned by this loggin user """
-
-        resp = self.http.get(url_maker("/scales"))
+    def get_queue(self):
+        resp = self.http.get("/queue")
         return self.process_data(resp)
