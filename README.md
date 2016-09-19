@@ -96,10 +96,9 @@ positional arguments:
                      create multiple apps from a directory containing app json
                      files
     get              list specified app information when given the app id
-    get_app_stats    list a specific app's status
     update           update app configuration
-    delete           Delete specified app
-    restart          Restart specified app
+    delete           delete specified app
+    restart          restart specified app
     get_app_versions
                      list all history versions for a specific app
     get_app_version  get specific history version for a specific app
