@@ -40,11 +40,6 @@ class AppPlugin(BORGClientPlugin):
         get_app_parser.add_argument('--app_id', dest="app_id", type=str, required=True)
         get_app_parser.set_defaults(func=self._get_app)
 
-        # sub-command: get_app_stats
-        #get_app_stats_parser = self.add_action('get_app_stats', help="list a specific app's status")
-        #get_app_stats_parser.add_argument('--app_id', dest="app_id", type=str, required=True)
-        #get_app_stats_parser.set_defaults(func=self._get_app_stats)
-
         # sub-command: update_app
         update_app_parser = self.add_action('update', help='update app configuration')
         update_app_parser.add_argument('--app_id', dest='app_id', type=str, required=True)
@@ -139,12 +134,6 @@ class AppPlugin(BORGClientPlugin):
         app_id = args.app_id
         borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
         return borg_client.restart_app(app_id)
-
-    def _get_app_stats(self, args):
-        configs = self._get_config()
-        app_id = args.app_id
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
-        return borg_client.get_app_stats(app_id)
 
     def _update_app(self, args):
         configs = self._get_config()
