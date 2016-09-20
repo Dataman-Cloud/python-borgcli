@@ -102,6 +102,7 @@ positional arguments:
     get_app_versions
                      list all history versions for a specific app
     get_app_version  get specific history version for a specific app
+    delete_tasks     scale tasks for apps
     get_queue        list all queues
     get_app_tasks    list all tasks for a specific app
 
@@ -120,5 +121,6 @@ $python borgapi_cli.py app get_app_versions --app_id wordpress
 $python borgapi_cli.py app get_app_version --app_id wordpress --version_id "2016-09-19T05:54:53.981Z"
 $python borgapi_cli.py app get_queue
 $python borgapi_cli.py app get_app_tasks --app_id wordpress
+$python borgapi_cli.py app delete_tasks --task_ids simple-template.05c3a9cc-7edd-11e6-aafb-26097dc1dffd
 ```
 

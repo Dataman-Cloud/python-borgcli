@@ -73,10 +73,10 @@ class AppPlugin(BORGClientPlugin):
         get_app_version_parser.set_defaults(func=self._get_app_version)
 
         # sub-command: delete_tasks
-        #scale_parser = self.add_action('delete_tasks', help='scale tasks for apps')
-        #scale_parser.add_argument('--scale', dest="if_scale", type=bool, required=False)
-        #scale_parser.add_argument('--app_ids', dest="app_ids", nargs='+', required=True)
-        #scale_parser.set_defaults(func=self._delete_tasks)
+        scale_parser = self.add_action('delete_tasks', help='scale tasks for apps')
+        scale_parser.add_argument('--scale', dest="if_scale", type=bool, required=False)
+        scale_parser.add_argument('--task_ids', dest="task_ids", nargs='+', required=True)
+        scale_parser.set_defaults(func=self._delete_tasks)
 
         # sub-command: get_queue
         get_queue_parser = self.add_action('get_queue', help='list all queues')
@@ -181,10 +181,8 @@ class AppPlugin(BORGClientPlugin):
         if_scale = False
         if args.if_scale:
             if_scale = args.if_scale
-        app_ids = args.app_ids
-        #TODO(zliu): data is not valid json
-        data = {"ids": app_ids}
-        print("data:", data)
+        task_ids = args.task_ids
+        data = {"ids": task_ids}
         borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
         return borg_client.delete_tasks(if_scale, **data)
 
