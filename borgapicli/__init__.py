@@ -3,6 +3,7 @@ import argparse, getpass, json
 from borgapicli.plugins.app import AppPlugin
 from borgapicli.plugins.auth import AuthPlugin
 from borgapicli.plugins.user import UserPlugin
+from borgapicli.plugins.info import BaseInfoPlugin
 
 
 class ClientRunner(object):
@@ -15,6 +16,11 @@ class ClientRunner(object):
         self.parser.add_argument('--version', '-v', action='version', version='borgsphere api client 1.0')
 
         subparsers = self.parser.add_subparsers(metavar='COMMAND')
+
+        # ping and version
+        self.base_plugin = BaseInfoPlugin(self)
+        self.base_plugin._before_register(subparsers)
+        self.base_plugin.register()
 
         # authenticate first
         self.auth_plugin = AuthPlugin(self)

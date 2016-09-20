@@ -1,5 +1,11 @@
 # python-borgcli
 
+## check service
+```
+$python borgapi_cli.py health_check --host http://192.168.1.155:9999
+$python borgapi_cli.py get_borg_version --host http://192.168.1.155:9999
+```
+
 ## Usage
 
 1. To use this client tool, please login first with following command:
@@ -38,14 +44,17 @@ borgsphere api client tool
 
 positional arguments:
   COMMAND
-    login        login with user email and password, api server is required
-    logout       delete login user's token, return code 0 if success
-    app          borgsphere app api command list
-    user         get user information
+    health_check    check if service is healthy, host is required
+    get_borg_version
+                    get borgsphere version info, host is required
+    login           login with user email and password, api server is required
+    logout          delete login user's token, return code 0 if success
+    app             borgsphere app api command list
+    user            get user information
 
 optional arguments:
-  -h, --help     show this help message and exit
-  --version, -v  show program's version number and exit
+  -h, --help        show this help message and exit
+  --version, -v     show program's version number and exit
 ```
 
 ### login
