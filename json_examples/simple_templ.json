@@ -1,0 +1,15 @@
+{
+  "id": "simple-template",
+  "cmd": "sleep 10",
+  "cpus": 0.1,
+  "mem": 128,
+  "disk": 0,
+  "instances": 1,
+  "container": {
+    "docker": {
+      "image": "blackicebird/2048:latest",
+      "network": "HOST"
+    },
+    "type": "DOCKER"
+  }
+}

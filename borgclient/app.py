@@ -19,8 +19,6 @@ import os, json
 from jsonschema import SchemaError, ValidationError, validate
 from borgclient.utils import url_maker
 
-APP_SCHEMA_FILE = './borgclient/app_schema.json'
-
 class AppMixin(object):
     """App associated APIs"""
 
@@ -37,20 +35,7 @@ class AppMixin(object):
         :param data: Dictionary to send in the body of the request.
 
         """
-
-        # NOTE(mgniu): `deep copy or shallow copy? i'm confused.
-        data = copy.deepcopy(kwargs)
-        if os.path.exists(APP_SCHEMA_FILE):
-            with open(APP_SCHEMA_FILE, 'r') as f:
-                schema = json.loads(f.read())
-        else:
-            schema = {}
-        try:
-            validate(data, schema)
-        except (SchemaError, ValidationError) as e:
-            return e
-
-        resp = self.http.post("/apps", data=data)
+        resp = self.http.post("/apps", data=kwargs)
 
         return self.process_data(resp)
 
@@ -71,18 +56,7 @@ class AppMixin(object):
     def update_app(self, app_id, **kwargs):
         """Updated app configuration"""
 
-        data = copy.deepcopy(kwargs)
-        if os.path.exists(APP_SCHEMA_FILE):
-            with open(APP_SCHEMA_FILE, 'r') as f:
-                schema = json.loads(f.read())
-        else:
-            schema = {}
-        try:
-            validate(data, schema)
-        except (SchemaError, ValidationError) as e:
-            return e
-
-        resp = self.http.put(url_maker("/apps", app_id), data=data)
+        resp = self.http.put(url_maker("/apps", app_id), data=kwargs)
 
         return self.process_data(resp)
 
