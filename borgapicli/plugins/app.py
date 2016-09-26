@@ -51,6 +51,11 @@ class AppPlugin(BORGClientPlugin):
         delete_app_parser.add_argument('--app_id', dest="app_id", type=str, required=True)
         delete_app_parser.set_defaults(func=self._delete_app)
 
+        # sub-command: delete_multi_apps
+        delete_multi_apps_parser = self.add_action('delete_multi_apps', help='delete multiple apps')
+        delete_multi_apps_parser.add_argument('--app_ids', dest="app_ids", nargs="+", required=True)
+        delete_multi_apps_parser.set_defaults(func=self._delete_multi_apps)
+
         # sub-command: restart_app
         restart_app_parser = self.add_action('restart', help='restart specified app')
         restart_app_parser.add_argument('--app_id', dest="app_id", type=str, required=True)
@@ -81,6 +86,7 @@ class AppPlugin(BORGClientPlugin):
         get_app_tasks_parser = self.add_action('get_app_tasks', help='list all tasks for a specific app')
         get_app_tasks_parser.add_argument('--app_id', dest='app_id', type=str, required=True)
         get_app_tasks_parser.set_defaults(func=self._get_app_tasks)
+
 
     def _get_apps(self, args):
         configs = self._get_config()
@@ -128,6 +134,19 @@ class AppPlugin(BORGClientPlugin):
         app_id = args.app_id
         borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
         return borg_client.delete_app(app_id)
+
+    def _delete_multi_apps(self, args):
+        configs = self._get_config()
+        app_ids = args.app_ids
+        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        delete_results = []
+        for app_id in app_ids:
+            result = borg_client.delete_app(app_id)
+            delete_results.append({
+                "app_id": app_id,
+                "result": result
+                })
+        return delete_results
 
     def _restart_app(self, args):
         configs = self._get_config()

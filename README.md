@@ -107,6 +107,8 @@ positional arguments:
     get              list specified app information when given the app id
     update           update app configuration
     delete           delete specified app
+    delete_multi_apps
+                     delete multiple apps
     restart          restart specified app
     get_app_versions
                      list all history versions for a specific app
@@ -131,5 +133,6 @@ $python borgapi_cli.py app get_app_version --app_id wordpress --version_id "2016
 $python borgapi_cli.py app get_queue
 $python borgapi_cli.py app get_app_tasks --app_id wordpress
 $python borgapi_cli.py app delete_tasks --task_ids simple-template.05c3a9cc-7edd-11e6-aafb-26097dc1dffd
+$python borgapi_cli.py app delete_multi_apps --app_ids 123 123 haha
 ```
 
