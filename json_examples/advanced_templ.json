@@ -5,6 +5,13 @@
   "mem": 32,
   "disk": 0,
   "instances": 1,
+  "constraints": [
+    [
+      "vcluster",
+      "LIKE",
+      "请替换集群名称"
+    ]
+  ],
   "container": {
     "type": "DOCKER",
     "volumes": [],

@@ -1,10 +1,17 @@
 {
-  "id": "wordpress",
+  "id": "test-wordpress",
   "cmd": "sleep 10",
   "cpus": 0.1,
   "mem": 32,
   "disk": 0,
   "instances": 1,
+  "constraints": [
+    [
+        "vcluster",
+        "LIKE",
+        "test"
+    ]
+  ],
   "container": {
     "type": "DOCKER",
     "volumes": [],
@@ -36,5 +43,15 @@
       "maxConsecutiveFailures": 3,
       "ignoreHttp1xx": false
     }
+  ],
+  "portDefinitions":[
+          {
+              "port":10002,
+              "protocol":"tcp",
+              "name":"service",
+              "labels":{
+  
+              }
+          }
   ]
 }

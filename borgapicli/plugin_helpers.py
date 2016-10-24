@@ -43,7 +43,7 @@ class BORGClientPlugin(object):
             else:
                 raise IOError
         except IOError:
-            print('Please authenticate with email and password firstly')
+            print('Please authenticate with username and password firstly')
             sys.exit(1)
 
     def _delete_config(self):

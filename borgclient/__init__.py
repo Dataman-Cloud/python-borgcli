@@ -44,11 +44,11 @@ class BorgClient(AppMixin, UserMixin, AuthMixin, BaseInfoMixin):
     Client for user to use Borgsphere.
     """
 
-    def __init__(self, server_url, email, password, token=None):
+    def __init__(self, server_url, username, password, token=None):
 
         self.server_url = server_url
 
-        self.http = HTTPClient(server_url, email, password, token=token)
+        self.http = HTTPClient(server_url, username, password, token=token)
 
         super(BorgClient, self).__init__()
 

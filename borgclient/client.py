@@ -52,7 +52,7 @@ class HTTPClient(object):
 
         if self._name and self._password:
             with self.get_session() as session:
-                data = {"email": self._name, "password": self._password}
+                data = {"userName": self._name, "password": self._password}
                 resp = session.request("POST", self._base_url + "/login",
                                        data=json.dumps(data))
 

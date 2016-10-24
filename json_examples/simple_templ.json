@@ -1,10 +1,17 @@
 {
   "id": "simple-template",
-  "cmd": "sleep 10",
+  "cmd": null,
   "cpus": 0.1,
   "mem": 128,
   "disk": 0,
   "instances": 1,
+  "constraints": [
+    [
+      "vcluster",
+      "LIKE",
+      "请替换集群名称"
+    ]
+  ],
   "container": {
     "docker": {
       "image": "blackicebird/2048:latest",

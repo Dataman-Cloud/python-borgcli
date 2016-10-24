@@ -21,7 +21,7 @@ class AuthMixin(object):
         """List user info from token"""
 
         data = {
-            "email": name,
+            "userName": name,
             "password": passwd
         }
 

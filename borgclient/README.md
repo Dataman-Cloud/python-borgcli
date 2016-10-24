@@ -20,7 +20,7 @@ python3 setup.py install
 
 ```
 >> from omegaclient import OmegaClient
->> client = OmegaClient(server_url, email, password)
+>> client = OmegaClient(server_url, username, password)
 >> client.get_clusters()
 >> ...
 ```
@@ -33,7 +33,7 @@ python3 setup.py install
 Fetch user token
 ```
 ```
-arguments: email - user email
+arguments: username - user username
            passed - user passed
            
 returns: Dicitonary contains token

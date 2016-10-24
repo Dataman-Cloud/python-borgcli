@@ -33,10 +33,10 @@ class AuthPlugin(BORGClientPlugin):
     def register(self):
 
         # command: login
-        parser_auth = self.parser.add_parser('login', help="login with user email and password, api server is required")
+        parser_auth = self.parser.add_parser('login', help="login with username and password, api server is required")
         authen_group = parser_auth.add_argument_group('authentication')
         authen_group.add_argument("--host", dest="host", type=str, required=True)
-        authen_group.add_argument("--email", dest="email", type=str, required=True)
+        authen_group.add_argument("--username", dest="username", type=str, required=True)
         authen_group.add_argument("--password", dest="password", action=PasswordPromptAction, type=str, required=True)
         parser_auth.set_defaults(func=self._authen_handler)
 
@@ -45,11 +45,11 @@ class AuthPlugin(BORGClientPlugin):
         parser_logout.set_defaults(func=self._logout_handler)
 
     def _authen_handler(self, args): 
-        email = args.email
+        username = args.username
         password = args.password
         host = args.host
-        borg_client = borgclient.BorgClient(host, email, password)
-        token_json = borg_client.get_token(email, password)
+        borg_client = borgclient.BorgClient(host, username, password)
+        token_json = borg_client.get_token(username, password)
         if (token_json['code'] == 0):
             configs = {'host': host}
             configs.update({'token': token_json['data']}) 

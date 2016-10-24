@@ -9,5 +9,3 @@ ADD . /code/
 RUN pip3 install -r /code/requirements.txt
 
 WORKDIR /code
-
-ENTRYPOINT ["python3", "borgapi_cli.py", "-v"]

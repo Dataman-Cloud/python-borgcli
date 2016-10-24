@@ -1,5 +1,15 @@
 # python-borgcli
 
+## build image:
+```
+$sudo docker build -t IMAGE_NAME .
+```
+
+## setup container and use cli:
+```
+$sudo docker run -it IMAGE_NAME bash
+```
+
 ## check service
 ```
 $python borgapi_cli.py health_check --host http://192.168.1.155:9999
@@ -10,14 +20,14 @@ $python borgapi_cli.py get_borg_version --host http://192.168.1.155:9999
 
 1. To use this client tool, please login first with following command:
 ```
-$python borgapi_cli.py login --host --email --password
+$python borgapi_cli.py login --host --username --password
 ```
-arguments host, email and password must be specified.
+arguments host, username and password must be specified.
 password is prompted for credential when command is entered.
 
 example:
 ```
-$python borgapi_cli.py login --host="http://192.168.1.155:9999" --email admin@dataman-inc.com --password
+$python borgapi_cli.py login --host="http://192.168.1.155:9999" --username admin@dataman-inc.com --password
 ```
 
 2. After login, user can get user info through command:
@@ -47,7 +57,7 @@ positional arguments:
     health_check    check if service is healthy, host is required
     get_borg_version
                     get borgsphere version info, host is required
-    login           login with user email and password, api server is required
+    login           login with user username and password, api server is required
     logout          delete login user's token, return code 0 if success
     app             borgsphere app api command list
     user            get user information
@@ -63,14 +73,14 @@ optional arguments:
 $python borgapi_cli.py login
 ```
 ```
-usage: borgapi_cli login [-h] --host HOST --email EMAIL --password
+usage: borgapi_cli login [-h] --host HOST --username USERNAME --password
 
 optional arguments:
   -h, --help     show this help message and exit
 
 authentication:
   --host HOST
-  --email EMAIL
+  --username USERNAME
   --password
 ```
 ### user
