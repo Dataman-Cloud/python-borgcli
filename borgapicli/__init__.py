@@ -40,4 +40,5 @@ class ClientRunner(object):
     def run(self, args=None):
         self.args = self.parser.parse_args(args=args)
         data = self.args.func(self.args)
-        print(data)
+        if isinstance(data, dict):
+            print(json.dumps(data))
