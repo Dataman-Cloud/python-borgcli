@@ -48,7 +48,7 @@ class AuthPlugin(BORGClientPlugin):
         username = args.username
         password = args.password
         host = args.host
-        borg_client = borgclient.BorgClient(host, username, password)
+        borg_client = borgclient.BorgClient(host)
         token_json = borg_client.get_token(username, password)
         if (token_json['code'] == 0):
             configs = {'host': host}
@@ -58,6 +58,6 @@ class AuthPlugin(BORGClientPlugin):
 
     def _logout_handler(self, args):
         configs = self._get_config()
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        borg_client = borgclient.BorgClient(configs['host'], token=configs['token'])
         self._delete_config()
         return borg_client.delete_token()

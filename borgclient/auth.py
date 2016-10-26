@@ -24,7 +24,6 @@ class AuthMixin(object):
             "userName": name,
             "password": passwd
         }
-
         resp = self.http.post("/login", data=data)
 
         return self.process_data(resp)

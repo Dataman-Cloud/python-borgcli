@@ -90,7 +90,7 @@ class AppPlugin(BORGClientPlugin):
 
     def _get_apps(self, args):
         configs = self._get_config()
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        borg_client = borgclient.BorgClient(configs['host'], token=configs['token'])
         return borg_client.get_apps()
 
     def _create_app(self, args):
@@ -100,12 +100,12 @@ class AppPlugin(BORGClientPlugin):
         except ValueError as e:
             raise e
 
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        borg_client = borgclient.BorgClient(configs['host'], token=configs['token'])
         return borg_client.create_app(**data)
 
     def _create_multi_apps(self, args):
         configs = self._get_config()
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        borg_client = borgclient.BorgClient(configs['host'], token=configs['token'])
         app_dir = args.dir
         files = [f for f in listdir(app_dir) if isfile(join(app_dir, f))]
         created_apps = []
@@ -126,19 +126,19 @@ class AppPlugin(BORGClientPlugin):
     def _get_app(self, args):
         configs = self._get_config()
         app_id = args.app_id
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        borg_client = borgclient.BorgClient(configs['host'], token=configs['token'])
         return borg_client.get_app(app_id)
 
     def _delete_app(self, args):
         configs = self._get_config()
         app_id = args.app_id
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        borg_client = borgclient.BorgClient(configs['host'], token=configs['token'])
         return borg_client.delete_app(app_id)
 
     def _delete_multi_apps(self, args):
         configs = self._get_config()
         app_ids = args.app_ids
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        borg_client = borgclient.BorgClient(configs['host'], token=configs['token'])
         delete_results = []
         for app_id in app_ids:
             result = borg_client.delete_app(app_id)
@@ -151,7 +151,7 @@ class AppPlugin(BORGClientPlugin):
     def _restart_app(self, args):
         configs = self._get_config()
         app_id = args.app_id
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        borg_client = borgclient.BorgClient(configs['host'], token=configs['token'])
         return borg_client.restart_app(app_id)
 
     def _update_app(self, args):
@@ -162,26 +162,26 @@ class AppPlugin(BORGClientPlugin):
         except ValueError as e:
             raise e
 
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        borg_client = borgclient.BorgClient(configs['host'], token=configs['token'])
         return borg_client.update_app(app_id, **data)
 
     def _get_app_tasks(self, args):
         configs = self._get_config()
         app_id = args.app_id
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        borg_client = borgclient.BorgClient(configs['host'], token=configs['token'])
         return borg_client.get_app_tasks(app_id)
 
     def _get_app_versions(self, args):
         configs = self._get_config()
         app_id = args.app_id
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        borg_client = borgclient.BorgClient(configs['host'], token=configs['token'])
         return borg_client.get_app_versions(app_id)
 
     def _get_app_version(self, args):
         configs = self._get_config()
         app_id = args.app_id
         version_id = args.version_id
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        borg_client = borgclient.BorgClient(configs['host'], token=configs['token'])
         return borg_client.get_app_version(app_id, version_id)
 
     def _delete_tasks(self, args):
@@ -191,10 +191,10 @@ class AppPlugin(BORGClientPlugin):
             if_scale = args.if_scale
         task_ids = args.task_ids
         data = {"ids": task_ids}
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        borg_client = borgclient.BorgClient(configs['host'], token=configs['token'])
         return borg_client.delete_tasks(if_scale, **data)
 
     def _get_queue(self, args):
         configs = self._get_config()
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        borg_client = borgclient.BorgClient(configs['host'], token=configs['token'])
         return borg_client.get_queue()

@@ -22,15 +22,11 @@ API_VERSION = "/v1"
 class HTTPClient(object):
     """Http client for send http requests"""
 
-    def __init__(self, server_url, name, password, token=None):
+    def __init__(self, server_url, token=None):
         self._base_url = self.get_url(server_url)
-        self._name = name 
-        self._password = password
-        self._session = None
         self._token = token
+        self._session = None
         self.timeout = 86400
-
-        self.get_token()
 
     @staticmethod
     def get_url(server_url):
@@ -46,20 +42,6 @@ class HTTPClient(object):
         if not self._session:
             self._session = requests.Session()
         return self._session
-
-    def get_token(self):
-        """Obtain user auth token"""
-
-        if self._name and self._password:
-            with self.get_session() as session:
-                data = {"userName": self._name, "password": self._password}
-                resp = session.request("POST", self._base_url + "/login",
-                                       data=json.dumps(data))
-
-                if resp.json()['code'] == 0:
-                    self._token = resp.json()['data']
-                else:
-                    print ('Ooops, authentication failed!')
 
     def _request(self, url, method, **kwargs):
         """Send request"""
