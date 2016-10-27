@@ -5,6 +5,7 @@ from borgapicli.plugins.auth import AuthPlugin
 from borgapicli.plugins.user import UserPlugin
 from borgapicli.plugins.info import BaseInfoPlugin
 from borgapicli.plugins.group import GroupPlugin
+from borgapicli.plugins.registry import RegistryPlugin
 
 
 class ClientRunner(object):
@@ -34,14 +35,19 @@ class ClientRunner(object):
         app_plugin.register()
 
         # load user api command line
-        user_login = UserPlugin(self)
-        user_login._before_register(subparsers)
-        user_login.register()
+        user_plugin = UserPlugin(self)
+        user_plugin._before_register(subparsers)
+        user_plugin.register()
 
         # load group api command line
-        group_login = GroupPlugin(self)
-        group_login._before_register(subparsers)
-        group_login.register()
+        group_plugin = GroupPlugin(self)
+        group_plugin._before_register(subparsers)
+        group_plugin.register()
+
+        # load registry api command line
+        registry_plugin = RegistryPlugin(self)
+        registry_plugin._before_register(subparsers)
+        registry_plugin.register()
 
     def run(self, args=None):
         self.args = self.parser.parse_args(args=args)
