@@ -12,32 +12,32 @@ $sudo docker run -it IMAGE_NAME bash
 
 ## check service
 ```
-$python borgapi_cli.py health_check --host http://192.168.1.155:9999
-$python borgapi_cli.py get_borg_version --host http://192.168.1.155:9999
+$python3 borgapi_cli.py health_check --host http://192.168.1.155:9999
+$python3 borgapi_cli.py get_borg_version --host http://192.168.1.155:9999
 ```
 
 ## Usage
 
 1. To use this client tool, please login first with following command:
 ```
-$python borgapi_cli.py login --host --username --password
+$python3 borgapi_cli.py login --host --username --password
 ```
 arguments host, username and password must be specified.
 password is prompted for credential when command is entered.
 
 example:
 ```
-$python borgapi_cli.py login --host="http://192.168.1.155:9999" --username admin@dataman-inc.com --password
+$python3 borgapi_cli.py login --host="http://192.168.1.155:9999" --username admin@dataman-inc.com --password
 ```
 
 2. After login, user can get user info through command:
 ```
-$python borgapi_cli.py user info
+$python3 borgapi_cli.py user info
 ```
 
 3. Meanwhile, user can logout through command:
 ```
-$python borgapi_cli.py logout
+$python3 borgapi_cli.py logout
 ```
 
 ## Commands
@@ -45,7 +45,7 @@ Following are all commands borgapi_cli supports currently:
 
 ### basic
 ```
-$python borgapi_cli.py -h
+$python3 borgapi_cli.py -h
 ```
 ```
 usage: borgapi_cli [-h] [--version] COMMAND ...
@@ -70,7 +70,7 @@ optional arguments:
 ### login
 
 ```
-$python borgapi_cli.py login
+$python3 borgapi_cli.py login
 ```
 ```
 usage: borgapi_cli login [-h] --host HOST --username USERNAME --password
@@ -86,7 +86,7 @@ authentication:
 ### user
 
 ```
-$python borgapi_cli.py user -h
+$python3 borgapi_cli.py user -h
 ```
 ```
 usage: borgapi_cli user [-h] ACTION ...
@@ -102,7 +102,7 @@ optional arguments:
 ```
 ### group
 ```
-$python borgapi_cli.py group -h
+$python3 borgapi_cli.py group -h
 ```
 ```
 usage: borgapi_cli group [-h] ACTION ...
@@ -119,7 +119,7 @@ optional arguments:
 ### app
 
 ```
-$python borgapi_cli.py app -h
+$python3 borgapi_cli.py app -h
 ```
 ```
 usage: borgapi_cli app [-h] ACTION ...
@@ -149,17 +149,17 @@ optional arguments:
 ```
 #### Examples:
 ```
-$python borgapi_cli.py app all
-$python borgapi_cli.py app create -f json_examples/app_create_templ.json
-$python borgapi_cli.py app create_multi_apps -d json_examples/
-$python borgapi_cli.py app get --app_id wordpress
-$python borgapi_cli.py app update --app_id wordpress -f json_examples/app_update_templ.json
-$python borgapi_cli.py app restart --app_id wordpress
-$python borgapi_cli.py app get_app_versions --app_id wordpress
-$python borgapi_cli.py app get_app_version --app_id wordpress --version_id "2016-09-19T05:54:53.981Z"
-$python borgapi_cli.py app get_queue
-$python borgapi_cli.py app get_app_tasks --app_id wordpress
-$python borgapi_cli.py app delete_tasks --task_ids simple-template.05c3a9cc-7edd-11e6-aafb-26097dc1dffd
-$python borgapi_cli.py app delete_multi_apps --app_ids 123 123 haha
+$python3 borgapi_cli.py app all
+$python3 borgapi_cli.py app create -f json_examples/app_create_templ.json
+$python3 borgapi_cli.py app create_multi_apps -d json_examples/
+$python3 borgapi_cli.py app get --app_id wordpress
+$python3 borgapi_cli.py app update --app_id wordpress -f json_examples/app_update_templ.json
+$python3 borgapi_cli.py app restart --app_id wordpress
+$python3 borgapi_cli.py app get_app_versions --app_id wordpress
+$python3 borgapi_cli.py app get_app_version --app_id wordpress --version_id "2016-09-19T05:54:53.981Z"
+$python3 borgapi_cli.py app get_queue
+$python3 borgapi_cli.py app get_app_tasks --app_id wordpress
+$python3 borgapi_cli.py app delete_tasks --task_ids simple-template.05c3a9cc-7edd-11e6-aafb-26097dc1dffd
+$python3 borgapi_cli.py app delete_multi_apps --app_ids 123 123 haha
 ```
 
