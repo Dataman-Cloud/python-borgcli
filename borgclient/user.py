@@ -23,3 +23,8 @@ class UserMixin(object):
         resp = self.http.get("/aboutme")
 
         return self.process_data(resp)
+
+    def switch_group(self, **kwargs):
+        """Change user's current group"""
+        resp = self.http.patch("/currentgroup", data=kwargs)
+        return self.process_data(resp)

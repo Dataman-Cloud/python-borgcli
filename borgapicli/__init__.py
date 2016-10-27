@@ -4,6 +4,7 @@ from borgapicli.plugins.app import AppPlugin
 from borgapicli.plugins.auth import AuthPlugin
 from borgapicli.plugins.user import UserPlugin
 from borgapicli.plugins.info import BaseInfoPlugin
+from borgapicli.plugins.group import GroupPlugin
 
 
 class ClientRunner(object):
@@ -36,6 +37,11 @@ class ClientRunner(object):
         user_login = UserPlugin(self)
         user_login._before_register(subparsers)
         user_login.register()
+
+        # load group api command line
+        group_login = GroupPlugin(self)
+        group_login._before_register(subparsers)
+        group_login.register()
 
     def run(self, args=None):
         self.args = self.parser.parse_args(args=args)
