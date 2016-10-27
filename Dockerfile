@@ -1,5 +1,11 @@
-#FROM index.shurenyun.com/zqdou/python:3.4
-FROM python:3-onbuild
+FROM demoregistry.dataman-inc.com/library/centos7-base:latest
+
+# install python3
+RUN yum install -y epel-release && yum install -y python34 && \
+	yum clean all
+
+#install python3 pip
+RUN curl "https://bootstrap.pypa.io/get-pip.py"  |python3
 
 MAINTAINER Zheng Liu zliu@dataman-inc.com
 
