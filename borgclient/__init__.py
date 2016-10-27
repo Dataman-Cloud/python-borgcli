@@ -19,6 +19,7 @@ import logging
 from borgclient.client import HTTPClient
 from borgclient.app import AppMixin
 from borgclient.user import UserMixin
+from borgclient.group import GroupMixin
 from borgclient.auth import AuthMixin
 from borgclient.info import BaseInfoMixin
 
@@ -40,7 +41,7 @@ LOG.addHandler(_handler)
 LOG.setLevel(logging.INFO)
 
 
-class BorgClient(AppMixin, UserMixin, AuthMixin, BaseInfoMixin):
+class BorgClient(AppMixin, UserMixin, AuthMixin, BaseInfoMixin, GroupMixin):
     """
     Client for user to use Borgsphere.
     """
