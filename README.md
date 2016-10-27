@@ -93,7 +93,24 @@ usage: borgapi_cli user [-h] ACTION ...
 
 positional arguments:
   ACTION
-    info      show current login user information
+    info        show current login user information
+    switch_group
+                change user's current group
+
+optional arguments:
+  -h, --help    show this help message and exit
+```
+### group
+```
+$python borgapi_cli.py group -h
+```
+```
+usage: borgapi_cli group [-h] ACTION ...
+
+positional arguments:
+  ACTION
+    all       get all group information
+    get       get specified group
 
 optional arguments:
   -h, --help  show this help message and exit
