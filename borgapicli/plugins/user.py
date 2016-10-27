@@ -14,5 +14,5 @@ class UserPlugin(BORGClientPlugin):
 
     def _get_my_info(self, args):
         configs = self._get_config()
-        borg_client = borgclient.BorgClient(configs['host'], None, None, token=configs['token'])
+        borg_client = borgclient.BorgClient(configs['host'], token=configs['token'])
         return borg_client.get_user()
