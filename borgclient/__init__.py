@@ -23,6 +23,7 @@ from borgclient.auth import AuthMixin
 from borgclient.info import BaseInfoMixin
 
 from borgclient.exceptions import BorgException
+from requests.models import Response
 
 _DEFAULT_LOG_FORMAT = "%(asctime)s %(levelname)8s [%(name)s] %(message)s"
 _DEFAULT_LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -55,9 +56,13 @@ class BorgClient(AppMixin, UserMixin, AuthMixin, BaseInfoMixin):
     @staticmethod
     def process_data(resp):
         """Processing data response from Borgsphere API."""
-        try:
-            LOG.info(resp.json) 
-            return resp.json()
-        except ValueError:
-            LOG.info(resp.json) 
-            return resp.status_code
+        if isinstance(resp, Response):
+            try:
+                LOG.info(resp.json)
+                return resp.json()
+            except ValueError:
+                LOG.info(resp.json)
+                return resp.status_code
+        elif isinstance(resp, dict):
+            LOG.info(resp)
+            return resp

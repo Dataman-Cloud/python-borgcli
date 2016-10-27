@@ -19,11 +19,11 @@ class BaseInfoPlugin(BORGClientPlugin):
 
     def _health_check(self, args):
         host = args.host
-        borg_client = borgclient.BorgClient(host, "", "")
+        borg_client = borgclient.BorgClient(host)
         return borg_client.health_check()
 
     def _get_borg_version(self, args):
         host = args.host
-        borg_client = borgclient.BorgClient(host, "", "")
+        borg_client = borgclient.BorgClient(host)
         return borg_client.get_borg_version()
 

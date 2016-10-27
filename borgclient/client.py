@@ -63,8 +63,12 @@ class HTTPClient(object):
             kwargs.setdefault('timeout', self.timeout)
 
         with self.get_session() as session:
-            resp = session.request(method, url, **kwargs)
-        return resp
+            try:
+                resp = session.request(method, url, **kwargs)
+            except Exception as e:
+                return {"cliErr": str(e)}
+            else:
+                return resp
 
     def request(self, url, method, **kwargs):
         """Send requests with API Verison"""
