@@ -46,4 +46,4 @@ class ClientRunner(object):
             else:
                 print(data)
         else:
-            print("please specify one argument, or add -h to read usage")
+            print(json.dumps({"cliErr":"please specify one argument, or add -h to check help"}))
