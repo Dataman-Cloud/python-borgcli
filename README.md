@@ -57,10 +57,12 @@ positional arguments:
     health_check    check if service is healthy, host is required
     get_borg_version
                     get borgsphere version info, host is required
-    login           login with user username and password, api server is required
+    login           login with username and password, api server is required
     logout          delete login user's token, return code 0 if success
     app             borgsphere app api command list
     user            get user information
+    group           get group information
+    registry        registry related commands
 
 optional arguments:
   -h, --help        show this help message and exit
@@ -163,3 +165,31 @@ $python3 borgapi_cli.py app delete_tasks --task_ids simple-template.05c3a9cc-7ed
 $python3 borgapi_cli.py app delete_multi_apps --app_ids 123 123 haha
 ```
 
+### registry
+```
+$python3 borgapi_cli.py registry -h
+```
+```
+usage: borgapi_cli registry [-h] ACTION ...
+
+positional arguments:
+  ACTION
+    create    create third party registry
+    get       get specific third party registry
+    all       get all third party registries
+    update    update specific registry
+    delete    delete specific registry
+    get_uri   get specific registry's certification file uri
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+#### Examples:
+```
+$python3 borgapi_cli.py registry create --username admin --password dataman1234 --address calalog.shurenyun.com
+$python3 borgapi_cli.py registry all
+$python3 borgapi_cli.py registry get --registry_id 37
+$python3 borgapi_cli.py registry update --registry_id 37 --name test --username admin@dataman-inc.com --address index.shurenyun.com
+$python3 borgapi_cli.py registry get_uri --registry_id 36
+$python3 borgapi_cli.py registry delete --registry_id 36
+```
