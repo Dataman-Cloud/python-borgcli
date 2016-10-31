@@ -53,9 +53,6 @@ class ClientRunner(object):
         self.args = self.parser.parse_args(args=args)
         if len(vars(self.args)) > 0:
             data = self.args.func(self.args)
-            if isinstance(data, dict):
-                print(json.dumps(data))
-            else:
-                print(data)
+            print(json.dumps(data))
         else:
             print(json.dumps({"cliErr":"please specify one argument, or add -h to check help"}))
