@@ -7,6 +7,7 @@ from borgapicli.plugins.info import BaseInfoPlugin
 from borgapicli.plugins.group import GroupPlugin
 from borgapicli.plugins.registry import RegistryPlugin
 
+BORGCLI_VERSION = "v1.5"
 
 class ClientRunner(object):
     """
@@ -15,7 +16,7 @@ class ClientRunner(object):
 
     def setup(self):
         self.parser = argparse.ArgumentParser(prog='borgapi_cli', description='borgsphere api client tool')
-        self.parser.add_argument('--version', '-v', action='version', version='borgsphere api client 1.0')
+        self.parser.add_argument('--version', '-v', action='version', version=BORGCLI_VERSION)
 
         subparsers = self.parser.add_subparsers(metavar='COMMAND')
 
